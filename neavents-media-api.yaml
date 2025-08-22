@@ -1,0 +1,396 @@
+# OpenAPI Specification for the Neavents Media Service
+# Version: 2.1.0
+# This document is the definitive contract for the Media API, generated from the domain model.
+openapi: 3.0.1
+info:
+  title: "Neavents Media API"
+  version: "v2.1.0"
+  description: "API for handling media objects (images, videos) within the Neavents ecosystem."
+
+# Base path for all endpoints in this file
+servers:
+  - url: "/api/v1"
+
+# Reusable tags for organizing endpoints
+tags:
+  - name: Media
+    description: "Endpoints for managing media objects."
+
+# Path definitions for the API
+paths:
+  /media:
+    post:
+      tags:
+        - Media
+      summary: "Initiate a media upload"
+      description: "Starts the process for uploading a new media object. This returns a presigned URL that the client should use to upload the file directly to the storage provider."
+      operationId: "initiateMediaObjectUpload"
+      requestBody:
+        description: "Details of the file to be uploaded."
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiateMediaobjectUploadRequest'
+      responses:
+        '200':
+          description: "Upload initiated successfully. Returns the media object's ID and the presigned URL for the upload."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaObjectUploadDto'
+        '400':
+          description: "Bad Request. The request body is invalid or missing required fields."
+    get:
+      tags:
+        - Media
+      summary: "Get media objects by owner"
+      description: "Retrieves a list of all media objects associated with a specific owner entity (e.g., a user, a venue)."
+      operationId: "getMediaObjectsByOwner"
+      parameters:
+        - name: OwnerId
+          in: query
+          required: true
+          description: "The unique ULID of the owning entity."
+          schema:
+            type: string
+            format: ulid
+        - name: RootAggregateType
+          in: query
+          required: true
+          description: "The type of the owner entity (e.g., 'Venue', 'User')."
+          schema:
+            type: string
+            example: "Venue"
+      responses:
+        '200':
+          description: "Success. Returns a list of media objects."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MediaObjectDto'
+        '400':
+          description: "Bad Request. Query parameters are invalid."
+
+  /media/{mediaId}:
+    parameters:
+      - name: mediaId
+        in: path
+        required: true
+        description: "The unique ULID of the media object."
+        schema:
+          type: string
+          format: ulid
+          example: "01J4Z4Q4Z4Q4Z4Q4Z4Q4Z4Q4Z4"
+    get:
+      tags:
+        - Media
+      summary: "Get a specific media object"
+      description: "Retrieves the full details of a single media object by its ULID."
+      operationId: "getMediaObject"
+      responses:
+        '200':
+          description: "Success. Returns the requested media object."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaObjectDto'
+        '404':
+          description: "Not Found. No media object with the specified ID exists."
+    delete:
+      tags:
+        - Media
+      summary: "Remove a media object"
+      description: "Permanently deletes a media object from the system and storage."
+      operationId: "removeMediaObject"
+      responses:
+        '204':
+          description: "No Content. The media object was successfully deleted."
+        '404':
+          description: "Not Found. No media object with the specified ID exists."
+
+  /media/{mediaId}/details:
+    parameters:
+      - name: mediaId
+        in: path
+        required: true
+        description: "The unique ULID of the media object to update."
+        schema:
+          type: string
+          format: ulid
+    patch:
+      tags:
+        - Media
+      summary: "Update media object details"
+      description: "Updates the core properties of a media object, such as its filename or storage location. Use this for administrative changes."
+      operationId: "updateMediaObjectDetails"
+      requestBody:
+        description: "The details to update. Only include the fields you want to change."
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMediaObjectDetailsRequest'
+      responses:
+        '204':
+          description: "No Content. The update was successful."
+        '400':
+          description: "Bad Request. The request body is invalid."
+        '404':
+          description: "Not Found. No media object with the specified ID exists."
+
+  /media/{mediaId}/metadata:
+    parameters:
+      - name: mediaId
+        in: path
+        required: true
+        description: "The unique ULID of the media object to update."
+        schema:
+          type: string
+          format: ulid
+    patch:
+      tags:
+        - Media
+      summary: "Update media object metadata"
+      description: "Updates the descriptive metadata for a media object, such as alt text, caption, or dimensions."
+      operationId: "updateMediaObjectMetadata"
+      requestBody:
+        description: "The metadata to update. Only include the fields you want to change."
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMediaObjectMetadataRequest'
+      responses:
+        '204':
+          description: "No Content. The update was successful."
+        '400':
+          description: "Bad Request. The request body is invalid."
+        '404':
+          description: "Not Found. No media object with the specified ID exists."
+
+# Reusable component definitions
+components:
+  schemas:
+    # --- Request Bodies ---
+    InitiateMediaobjectUploadRequest:
+      type: object
+      required:
+        - fileName
+        - ownerType
+        - mediaType
+      properties:
+        fileName:
+          type: string
+          example: "beyoglu-cafe-entrance.jpg"
+        ownerType:
+          type: string
+          description: "The type of the entity that owns this media. (e.g., 'Venue', 'User')"
+          example: "Venue"
+        mediaType:
+          $ref: '#/components/schemas/MediaType'
+        imageType:
+          $ref: '#/components/schemas/ImageType'
+        videoType:
+          $ref: '#/components/schemas/VideoType'
+
+    UpdateMediaObjectDetailsRequest:
+      type: object
+      properties:
+        originalFileName:
+          type: string
+          nullable: true
+        fileSizeInBytes:
+          type: integer
+          format: int64
+          nullable: true
+        storageProvider:
+          $ref: '#/components/schemas/StorageProvider'
+        bucketName:
+          type: string
+          nullable: true
+        objectKey:
+          type: string
+          nullable: true
+        cdnUrl:
+          type: string
+          format: uri
+          nullable: true
+        cdnCachePolicy:
+          $ref: '#/components/schemas/CdnCachePolicy'
+
+    UpdateMediaObjectMetadataRequest:
+      type: object
+      properties:
+        altText:
+          type: string
+          description: "Descriptive text for accessibility (screen readers)."
+          nullable: true
+        caption:
+          type: string
+          description: "A caption to be displayed with the media."
+          nullable: true
+        dimensions:
+          $ref: '#/components/schemas/Dimensions'
+        durationInSeconds:
+          type: integer
+          description: "The duration of the video in seconds."
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+          description: "A list of tags associated with the media."
+          nullable: true
+        primaryAverageColor:
+          type: string
+          description: "The dominant color of the image, as a hex string."
+          example: "#3a6a8a"
+          nullable: true
+        secondaryAverageColor:
+          type: string
+          description: "The second most dominant color of the image, as a hex string."
+          example: "#a4c2d8"
+          nullable: true
+        leastAverageColor:
+          type: string
+          description: "The least dominant color of the image, as a hex string."
+          example: "#f0f0f0"
+          nullable: true
+        oppositeAverageColor:
+          type: string
+          description: "A contrasting color to the primary color, as a hex string."
+          example: "#c59575"
+          nullable: true
+
+    # --- Response DTOs ---
+    MediaObjectUploadDto:
+      type: object
+      properties:
+        mediaId:
+          type: string
+          format: ulid
+          description: "The newly created ULID for the media object."
+        uploadUrl:
+          type: string
+          format: uri
+          description: "The presigned URL to which the client must PUT the file binary."
+
+    MediaObjectDto:
+      type: object
+      description: "Represents the full state of a media object in the system."
+      properties:
+        mediaObjectId:
+          type: string
+          format: ulid
+        type:
+          $ref: '#/components/schemas/MediaType'
+        status:
+          $ref: '#/components/schemas/MediaStatus'
+        ownerUserId:
+          type: string
+          format: ulid
+          nullable: true
+        originalFileName:
+          type: string
+        mimeType:
+          type: string
+          example: "image/jpeg"
+        fileSizeInBytes:
+          type: integer
+          format: int64
+          nullable: true
+        storageProvider:
+          $ref: '#/components/schemas/StorageProvider'
+        bucketName:
+          type: string
+        objectKey:
+          type: string
+          description: "The unique key (path) of the object within the bucket."
+        metadata:
+          $ref: '#/components/schemas/MediaMetadata'
+        cdnUrl:
+          type: string
+          format: uri
+          nullable: true
+        cachePolicy:
+          $ref: '#/components/schemas/CdnCachePolicy'
+
+    # --- Nested Objects & Enums ---
+    MediaMetadata:
+      type: object
+      description: "Descriptive metadata associated with a media object."
+      properties:
+        altText:
+          type: string
+          nullable: true
+        caption:
+          type: string
+          nullable: true
+        dimensions:
+          $ref: '#/components/schemas/Dimensions'
+        durationInSeconds:
+          type: integer
+          nullable: true
+        primaryAverageColor:
+          type: string
+          description: "The dominant color of the image, as a hex string."
+          example: "#3a6a8a"
+          nullable: true
+        secondaryAverageColor:
+          type: string
+          description: "The second most dominant color of the image, as a hex string."
+          example: "#a4c2d8"
+          nullable: true
+        leastAverageColor:
+          type: string
+          description: "The least dominant color of the image, as a hex string."
+          example: "#f0f0f0"
+          nullable: true
+        oppositeAverageColor:
+          type: string
+          description: "A contrasting color to the primary color, as a hex string."
+          example: "#c59575"
+          nullable: true
+        tags:
+          type: object
+          description: "Represents a flexible JSON structure for tags. Could be an array of strings or a more complex object."
+          nullable: true
+          example: ["outdoor", "cafe", "beyoglu"]
+
+    Dimensions:
+      type: object
+      nullable: true
+      properties:
+        width:
+          type: integer
+          example: 1920
+        height:
+          type: integer
+          example: 1080
+
+    MediaType:
+      type: string
+      enum: [Image, Video, Document]
+    ImageType:
+      type: string
+      nullable: true
+      enum: [Jpeg, Png, Tiff, Webp]
+    VideoType:
+      type: string
+      nullable: true
+      enum: [Mp4, Mpeg, Webm]
+    MediaStatus:
+      type: string
+      description: "The current status of the media object in its lifecycle."
+      enum: [Uploading, Processing, Available, Failed]
+    StorageProvider:
+      type: string
+      nullable: true
+      enum: [BlackblazeB2, AwsS3, AzureBlob]
+    CdnCachePolicy:
+      type: string
+      nullable: true
+      enum: [Default, Short, Medium, Long, Never]

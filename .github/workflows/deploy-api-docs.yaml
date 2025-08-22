@@ -1,0 +1,50 @@
+name: Deploy Neavents API Docs to GitHub Pages
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Redoc CLI
+        run: npm install -g redoc-cli
+
+      - name: Build API Docs for each service
+        run: |
+          mkdir -p ./docs
+
+          # Generate an index page that links to each API
+          echo "<h1>Neavents API Documentation</h1>" > ./docs/index.html
+          echo "<ul>" >> ./docs/index.html
+          echo '<li><a href="./smart-menu/">Smart Menu API</a></li>' >> ./docs/index.html
+          echo '<li><a href="./media/">Media API</a></li>' >> ./docs/index.html
+          echo "</ul>" >> ./docs/index.html
+
+          redoc-cli bundle neavents-menu-api.yaml -o ./docs/smart-menu/index.html
+          redoc-cli bundle neavents-media-api.yaml -o ./docs/media/index.html
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

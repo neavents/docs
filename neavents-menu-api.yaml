@@ -1,0 +1,1230 @@
+# OpenAPI Specification for the Neavents SmartMenu Service
+# Version: 1.0.0
+# This document defines the complete API contract for creating and managing SmartMenus,
+# including sections, items, allergens, and cautions.
+openapi: 3.0.1
+info:
+  title: "Neavents SmartMenu API"
+  version: "v1.0.0"
+  description: "A comprehensive API for the Neavents SmartMenu feature."
+
+servers:
+  - url: "/api/v1"
+    description: "Version 1.0"
+
+tags:
+  - name: "SmartMenu"
+    description: "Core operations for managing SmartMenus."
+  - name: "Sections"
+    description: "Endpoints for managing sections within a SmartMenu."
+  - name: "Items"
+    description: "Endpoints for managing items within a menu section."
+  - name: "Sub-Items"
+    description: "Endpoints for managing sub-items, which are components of a main item."
+  - name: "Reference Items"
+    description: "Manages a global library of reusable menu items."
+  - name: "Allergen Definitions"
+    description: "Manages the global definitions of allergens (e.g., Gluten, Dairy)."
+  - name: "Allergen Linking"
+    description: "Endpoints for linking/unlinking allergens to/from specific menu items."
+  - name: "Caution Definitions"
+    description: "Manages the global definitions of cautions (e.g., Spicy, Contains Alcohol)."
+  - name: "Caution Linking"
+    description: "Endpoints for linking/unlinking cautions to/from specific menu items."
+
+paths:
+  # --- SmartMenuController ---
+  /smartmenu:
+    post:
+      tags: ["SmartMenu"]
+      summary: "Create a new SmartMenu"
+      operationId: "createSmartMenu"
+      requestBody:
+        $ref: '#/components/requestBodies/AddMenuCommand'
+      responses:
+        '201':
+          description: "SmartMenu created successfully."
+          content:
+            application/json:
+              schema:
+                type: string
+                format: ulid
+  /smartmenu/{smartMenuId}:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+    get:
+      tags: ["SmartMenu"]
+      summary: "Get public SmartMenu details"
+      operationId: "getPublicSmartMenuDetails"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartMenuDto'
+        '404':
+          description: "SmartMenu not found."
+    patch:
+      tags: ["SmartMenu"]
+      summary: "Update SmartMenu details"
+      operationId: "updateSmartMenuDetails"
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateMenuDetailsRequest'
+      responses:
+        '204':
+          description: "Update successful."
+        '404':
+          description: "SmartMenu not found."
+    delete:
+      tags: ["SmartMenu"]
+      summary: "Remove a SmartMenu"
+      operationId: "removeSmartMenu"
+      responses:
+        '204':
+          description: "Removal successful."
+        '404':
+          description: "SmartMenu not found."
+  /editor/smartmenu/{smartMenuId}:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+    get:
+      tags: ["SmartMenu"]
+      summary: "Get editor SmartMenu details"
+      description: "Retrieves detailed information about a SmartMenu, intended for an editing interface."
+      operationId: "getEditorSmartMenuDetails"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedSmartMenuDto'
+        '404':
+          description: "SmartMenu not found."
+
+  # --- SectionController ---
+  /smartmenu/{smartMenuId}/sections:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+    post:
+      tags: ["Sections"]
+      summary: "Add a section to a SmartMenu"
+      operationId: "addSectionToMenu"
+      requestBody:
+        $ref: '#/components/requestBodies/AddSectionToMenuRequest'
+      responses:
+        '201':
+          description: "Section created successfully."
+          content:
+            application/json:
+              schema:
+                type: string
+                format: ulid
+    get:
+      tags: ["Sections"]
+      summary: "Get all public sections for a SmartMenu"
+      operationId: "getAllPublicSections"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MenuSectionDto'
+  /smartmenu/{smartMenuId}/sections/{sectionId}:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/sectionId'
+    get:
+      tags: ["Sections"]
+      summary: "Get public section details by ID"
+      operationId: "getPublicSectionDetailsById"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuSectionDto'
+    patch:
+      tags: ["Sections"]
+      summary: "Update section details"
+      operationId: "updateSectionDetails"
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateSectionDetailsRequest'
+      responses:
+        '204':
+          description: "Update successful."
+    delete:
+      tags: ["Sections"]
+      summary: "Remove a section from a SmartMenu"
+      operationId: "removeSectionFromMenu"
+      responses:
+        '204':
+          description: "Removal successful."
+  /smartmenu/{smartMenuId}/sections/by-name/{sectionName}:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/sectionName'
+    get:
+      tags: ["Sections"]
+      summary: "Get public section details by name"
+      operationId: "getPublicSectionDetailsByName"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuSectionDto'
+  /smartmenu/{smartMenuId}/editor/sections/{sectionId}:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/sectionId'
+    get:
+      tags: ["Sections"]
+      summary: "Get editor section details by ID"
+      operationId: "getEditorSectionDetailsById"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedMenuSectionDto'
+  /smartmenu/{smartMenuId}/editor/sections/by-name/{sectionName}:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/sectionName'
+    get:
+      tags: ["Sections"]
+      summary: "Get editor section details by name"
+      operationId: "getEditorSectionDetailsByName"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedMenuSectionDto'
+
+  # --- ItemController ---
+  /smartmenu/{smartMenuId}/sections/{sectionId}/items:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/sectionId'
+    post:
+      tags: ["Items"]
+      summary: "Add a new item to a section"
+      operationId: "addItemToSection"
+      requestBody:
+        $ref: '#/components/requestBodies/AddItemToSectionRequest'
+      responses:
+        '201':
+          description: "Item created successfully."
+          content:
+            application/json:
+              schema:
+                type: string
+                format: ulid
+  /smartmenu/{smartMenuId}/sections/{sectionId}/items/by-reference:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/sectionId'
+    put:
+      tags: ["Items"]
+      summary: "Add an item to a section by reference"
+      description: "Links an existing reference item to a section."
+      operationId: "addItemToSectionByReference"
+      requestBody:
+        $ref: '#/components/requestBodies/AddItemToSectionByReferenceRequest'
+      responses:
+        '204':
+          description: "Item linked successfully."
+  /smartmenu/{smartMenuId}/sections/{sectionId}/items/{itemId}:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/sectionId'
+      - $ref: '#/components/parameters/itemId'
+    get:
+      tags: ["Items"]
+      summary: "Get public item details"
+      operationId: "getPublicItemDetails"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SectionItemDto'
+    patch:
+      tags: ["Items"]
+      summary: "Update item details"
+      operationId: "updateItemDetails"
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateItemDetailsRequest'
+      responses:
+        '204':
+          description: "Update successful."
+    delete:
+      tags: ["Items"]
+      summary: "Remove an item from a section"
+      operationId: "removeItemFromSection"
+      responses:
+        '204':
+          description: "Removal successful."
+  /smartmenu/{smartMenuId}/editor/sections/{sectionId}/items/{itemId}:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/sectionId'
+      - $ref: '#/components/parameters/itemId'
+    get:
+      tags: ["Items"]
+      summary: "Get editor item details"
+      operationId: "getEditorItemDetails"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedSectionItemDto'
+
+  # --- SubItemController ---
+  /smartmenu/{smartMenuId}/sections/{sectionId}/items/{itemId}/sub-items:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/sectionId'
+      - $ref: '#/components/parameters/itemId'
+    post:
+      tags: ["Sub-Items"]
+      summary: "Add a sub-item to an item"
+      operationId: "addSubItemToItem"
+      requestBody:
+        $ref: '#/components/requestBodies/AddSubItemToItemRequest'
+      responses:
+        '204':
+          description: "Sub-item added successfully."
+  /smartmenu/{smartMenuId}/sections/{sectionId}/items/{itemId}/sub-items/by-reference:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/sectionId'
+      - $ref: '#/components/parameters/itemId'
+      - $ref: '#/components/parameters/referenceItemId'
+    put:
+      tags: ["Sub-Items"]
+      summary: "Add a referenced sub-item to an item, the reference points to actual item in the menu."
+      operationId: "addReferencedSubItemToItem"
+      requestBody:
+        $ref: '#/components/requestBodies/AddSubItemToItemRequest'
+      responses:
+        '204':
+          description: "Referenced sub-item added successfully."
+  /smartmenu/{smartMenuId}/sections/{sectionId}/items/{itemId}/sub-items/{subItemId}:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/sectionId'
+      - $ref: '#/components/parameters/itemId'
+      - $ref: '#/components/parameters/subItemId'
+    patch:
+      tags: ["Sub-Items"]
+      summary: "Update sub-item details"
+      operationId: "updateSubItemDetails"
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateSubItemDetailsRequest'
+      responses:
+        '204':
+          description: "Update successful."
+    delete:
+      tags: ["Sub-Items"]
+      summary: "Remove a sub-item from an item"
+      operationId: "removeSubItemFromItem"
+      responses:
+        '204':
+          description: "Removal successful."
+
+  # --- AllergenLinkingController ---
+  /smartmenu/{smartMenuId}/items/{itemId}/allergens:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/itemId'
+    put:
+      tags: ["Allergen Linking"]
+      summary: "Link an allergen to an item"
+      operationId: "linkAllergenToItem"
+      requestBody:
+        $ref: '#/components/requestBodies/LinkAllergenToItemRequest'
+      responses:
+        '200':
+          description: "Link successful."
+          content:
+            application/json:
+              schema:
+                type: string
+                format: ulid
+    get:
+      tags: ["Allergen Linking"]
+      summary: "Get linked allergens for an item"
+      operationId: "getLinkedAllergens"
+      description: "NOTE: The backend implementation for this endpoint is explicitly marked as 'NotImplemented'."
+      responses:
+        '501':
+          description: "This endpoint is not implemented. Allergen information is retrieved as part of the parent Item DTO."
+  /smartmenu/{smartMenuId}/items/{itemId}/allergens/{allergenId}:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/itemId'
+      - $ref: '#/components/parameters/allergenId'
+    delete:
+      tags: ["Allergen Linking"]
+      summary: "Unlink an allergen from an item"
+      operationId: "unlinkAllergenFromItem"
+      responses:
+        '204':
+          description: "Unlink successful."
+
+  # --- CautionLinkingController ---
+  /smartmenu/{smartMenuId}/items/{itemId}/cautions:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/itemId'
+    put:
+      tags: ["Caution Linking"]
+      summary: "Link a caution to an item"
+      operationId: "linkCautionToItem"
+      requestBody:
+        $ref: '#/components/requestBodies/LinkCautionToItemRequest'
+      responses:
+        '200':
+          description: "Link successful."
+          content:
+            application/json:
+              schema:
+                type: string
+                format: ulid
+    get:
+      tags: ["Caution Linking"]
+      summary: "Get linked cautions for an item"
+      operationId: "getLinkedCautions"
+      description: "NOTE: The backend implementation for this endpoint is explicitly marked as 'NotImplemented'."
+      responses:
+        '501':
+          description: "This endpoint is not implemented. Caution information is retrieved as part of the parent Item DTO."
+  /smartmenu/{smartMenuId}/items/{itemId}/cautions/{cautionId}:
+    parameters:
+      - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/itemId'
+      - $ref: '#/components/parameters/cautionId'
+    delete:
+      tags: ["Caution Linking"]
+      summary: "Unlink a caution from an item"
+      operationId: "unlinkCautionFromItem"
+      responses:
+        '204':
+          description: "Unlink successful."
+
+  # --- AllergenDefinitionController ---
+  /allergens:
+    post:
+      tags: ["Allergen Definitions"]
+      summary: "Create a new allergen definition"
+      operationId: "createAllergenDefinition"
+      requestBody:
+        $ref: '#/components/requestBodies/CreateAllergenDefinitionCommand'
+      responses:
+        '201':
+          description: "Allergen created successfully."
+          content:
+            application/json:
+              schema:
+                type: string
+                format: ulid
+        '409':
+          description: "Conflict. An allergen with this name may already exist."
+    get:
+      tags: ["Allergen Definitions"]
+      summary: "Get all allergen definitions"
+      operationId: "getAllAllergenDefinitions"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AllergenDto'
+  /allergens/{allergenId}:
+    parameters:
+      - $ref: '#/components/parameters/allergenId'
+    get:
+      tags: ["Allergen Definitions"]
+      summary: "Get an allergen definition by ID"
+      operationId: "getAllergenDefinition"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllergenDto'
+        '404':
+          description: "Allergen not found."
+    patch:
+      tags: ["Allergen Definitions"]
+      summary: "Update an allergen definition"
+      operationId: "updateAllergenDefinition"
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateAllergenDefinitionRequest'
+      responses:
+        '204':
+          description: "Update successful."
+    delete:
+      tags: ["Allergen Definitions"]
+      summary: "Remove an allergen definition"
+      operationId: "removeAllergenDefinition"
+      responses:
+        '204':
+          description: "Removal successful."
+
+  # --- CautionDefinitionController ---
+  /cautions:
+    post:
+      tags: ["Caution Definitions"]
+      summary: "Create a new caution definition"
+      operationId: "createCautionDefinition"
+      requestBody:
+        $ref: '#/components/requestBodies/CreateCautionDefinitionCommand'
+      responses:
+        '201':
+          description: "Caution created successfully."
+          content:
+            application/json:
+              schema:
+                type: string
+                format: ulid
+    get:
+      tags: ["Caution Definitions"]
+      summary: "Get all caution definitions"
+      operationId: "getAllCautionDefinitions"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CautionDto'
+  /cautions/{cautionId}:
+    parameters:
+      - $ref: '#/components/parameters/cautionId'
+    get:
+      tags: ["Caution Definitions"]
+      summary: "Get a caution definition by ID"
+      operationId: "getCautionDefinition"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CautionDto'
+        '404':
+          description: "Caution not found."
+    patch:
+      tags: ["Caution Definitions"]
+      summary: "Update a caution definition"
+      operationId: "updateCautionDefinition"
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateCautionDefinitionRequest'
+      responses:
+        '204':
+          description: "Update successful."
+    delete:
+      tags: ["Caution Definitions"]
+      summary: "Remove a caution definition"
+      operationId: "removeCautionDefinition"
+      responses:
+        '204':
+          description: "Removal successful."
+
+  # --- ReferenceItemController ---
+  /reference-items:
+    post:
+      tags: ["Reference Items"]
+      summary: "Create a new reference item"
+      operationId: "createReferenceItem"
+      requestBody:
+        $ref: '#/components/requestBodies/AddReferenceItemCommand'
+      responses:
+        '201':
+          description: "Reference item created successfully."
+          content:
+            application/json:
+              schema:
+                type: string
+                format: ulid
+    get:
+      tags: ["Reference Items"]
+      summary: "Get all reference items"
+      operationId: "getAllReferenceItems"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SectionItemDto'
+  /reference-items/by-category/{category}:
+    parameters:
+      - name: category
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: ["Reference Items"]
+      summary: "Get all reference items by category"
+      operationId: "getAllReferenceItemsByCategory"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SectionItemDto'
+  /reference-items/{itemId}:
+    parameters:
+      - $ref: '#/components/parameters/itemId'
+    get:
+      tags: ["Reference Items"]
+      summary: "Get a reference item by ID"
+      operationId: "getReferenceItem"
+      responses:
+        '200':
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SectionItemDto'
+    patch:
+      tags: ["Reference Items"]
+      summary: "Update a reference item"
+      operationId: "updateReferenceItem"
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateReferenceItemDetailsRequest'
+      responses:
+        '204':
+          description: "Update successful."
+    delete:
+      tags: ["Reference Items"]
+      summary: "Remove a reference item"
+      operationId: "removeReferenceItem"
+      responses:
+        '204':
+          description: "Removal successful."
+
+components:
+  # --- Reusable Parameters ---
+  parameters:
+    smartMenuId:
+      name: smartMenuId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: ulid
+    sectionId:
+      name: sectionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: ulid
+    itemId:
+      name: itemId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: ulid
+    subItemId:
+      name: subItemId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: ulid
+    allergenId:
+      name: allergenId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: ulid
+    cautionId:
+      name: cautionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: ulid
+    sectionName:
+      name: sectionName
+      in: path
+      required: true
+      schema:
+        type: string
+
+  # --- Reusable Request Bodies ---
+  requestBodies:
+    AddMenuCommand:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              ownerId:
+                type: string
+                format: ulid
+              rootAggregateType:
+                $ref: '#/components/schemas/RootAggregateType'
+              name:
+                type: string
+              description:
+                type: string
+    UpdateMenuDetailsRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+    AddSectionToMenuRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              sectionIconUrl:
+                type: string
+                format: uri
+                nullable: true
+    UpdateSectionDetailsRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              iconUrl:
+                type: string
+                format: uri
+                nullable: true
+    AddItemToSectionRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              baseNutrition:
+                $ref: '#/components/schemas/NutritionalInfo'
+              price:
+                $ref: '#/components/schemas/Price'
+              portion:
+                $ref: '#/components/schemas/PortionInfo'
+    AddItemToSectionByReferenceRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              referenceItemId:
+                type: string
+                format: ulid
+    UpdateItemDetailsRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              nutrition:
+                $ref: '#/components/schemas/NutritionalInfo'
+              price:
+                $ref: '#/components/schemas/Price'
+              portion:
+                $ref: '#/components/schemas/PortionInfo'
+    AddSubItemToItemRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              nutrition:
+                $ref: '#/components/schemas/NutritionalInfo'
+              portion:
+                $ref: '#/components/schemas/PortionInfo'
+              referenceSectionItemId:
+                type: string
+                format: ulid
+                nullable: true
+    UpdateSubItemDetailsRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              nutrition:
+                $ref: '#/components/schemas/NutritionalInfo'
+              portion:
+                $ref: '#/components/schemas/PortionInfo'
+    LinkAllergenToItemRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              allergenId:
+                type: string
+                format: ulid
+    UnLinkAllergenFromItemRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              allergenId:
+                type: string
+                format: ulid
+    LinkCautionToItemRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              cautionId:
+                type: string
+                format: ulid
+    UnLinkCautionFromItemRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              cautionId:
+                type: string
+                format: ulid
+    CreateAllergenDefinitionCommand:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              externalInformationLink:
+                type: string
+                format: uri
+              iconUrl:
+                type: string
+                format: uri
+              hexColorPrimary:
+                type: string
+              hexColorSecondary:
+                type: string
+    UpdateAllergenDefinitionRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              externalInformationLink:
+                type: string
+                format: uri
+              iconUrl:
+                type: string
+                format: uri
+              hexColorPrimary:
+                type: string
+              hexColorSecondary:
+                type: string
+    CreateCautionDefinitionCommand:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              alert:
+                type: string
+              iconUrl:
+                type: string
+                format: uri
+              hexColorPrimary:
+                type: string
+              hexColorSecondary:
+                type: string
+    UpdateCautionDefinitionRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              alert:
+                type: string
+              iconUrl:
+                type: string
+                format: uri
+              hexColorPrimary:
+                type: string
+              hexColorSecondary:
+                type: string
+    AddReferenceItemCommand:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              baseNutrition:
+                $ref: '#/components/schemas/NutritionalInfo'
+              price:
+                $ref: '#/components/schemas/Price'
+              portion:
+                $ref: '#/components/schemas/PortionInfo'
+    UpdateReferenceItemDetailsRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              nutrition:
+                $ref: '#/components/schemas/NutritionalInfo'
+              price:
+                $ref: '#/components/schemas/Price'
+              portion:
+                $ref: '#/components/schemas/PortionInfo'
+
+  # --- Schemas (DTOs and Models) ---
+  schemas:
+    SmartMenuDto:
+      type: object
+      properties:
+        smartMenuId:
+          type: string
+          format: ulid
+        ownerId:
+          type: string
+          format: ulid
+        rootAggregateType:
+          $ref: '#/components/schemas/RootAggregateType'
+        name:
+          type: string
+        description:
+          type: string
+        mediaGalleryId:
+          type: string
+          format: ulid
+          nullable: true
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuSectionDto'
+    DetailedSmartMenuDto:
+      type: object
+      properties:
+        smartMenuDto:
+          $ref: '#/components/schemas/SmartMenuDto'
+        detailsDto:
+          $ref: '#/components/schemas/HyperDetailsDto'
+    MenuSectionDto:
+      type: object
+      properties:
+        menuSectionId:
+          type: string
+          format: ulid
+        smartMenuId:
+          type: string
+          format: ulid
+        name:
+          type: string
+        description:
+          type: string
+        sectionIconUrl:
+          type: string
+          format: uri
+          nullable: true
+        mediaGalleryId:
+          type: string
+          format: ulid
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SectionItemDto'
+    DetailedMenuSectionDto:
+      type: object
+      properties:
+        menuSectionDto:
+          $ref: '#/components/schemas/MenuSectionDto'
+        detailsDto:
+          $ref: '#/components/schemas/HyperDetailsDto'
+    SectionItemDto:
+      type: object
+      properties:
+        sectionItemId:
+          type: string
+          format: ulid
+        menuSectionId:
+          type: string
+          format: ulid
+        name:
+          type: string
+        description:
+          type: string
+        baseNutrition:
+          $ref: '#/components/schemas/NutritionalInfo'
+        totalNutrition:
+          $ref: '#/components/schemas/NutritionalInfo'
+        portion:
+          $ref: '#/components/schemas/PortionInfo'
+        subItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubItemDto'
+        cautions:
+          type: array
+          items:
+            $ref: '#/components/schemas/LinkedCaution'
+        allergens:
+          type: array
+          items:
+            $ref: '#/components/schemas/LinkedAllergen'
+        price:
+          $ref: '#/components/schemas/Price'
+        mediaGalleryId:
+          type: string
+          format: ulid
+          nullable: true
+    DetailedSectionItemDto:
+      type: object
+      properties:
+        sectionItemDto:
+          $ref: '#/components/schemas/SectionItemDto'
+        detailsDto:
+          $ref: '#/components/schemas/HyperDetailsDto'
+    SubItemDto:
+      type: object
+      properties:
+        subItemId:
+          type: string
+          format: ulid
+        sectionItemId:
+          type: string
+          format: ulid
+        referenceSectionItemId:
+          type: string
+          format: ulid
+          nullable: true
+        name:
+          type: string
+        description:
+          type: string
+        nutrition:
+          $ref: '#/components/schemas/NutritionalInfo'
+        portion:
+          $ref: '#/components/schemas/PortionInfo'
+        mediaGalleryId:
+          type: string
+          format: ulid
+          nullable: true
+    AllergenDto:
+      type: object
+      properties:
+        allergenId:
+          type: string
+          format: ulid
+        name:
+          type: string
+        description:
+          type: string
+        externalInformationLink:
+          type: string
+          format: uri
+          nullable: true
+        iconUrl:
+          type: string
+          format: uri
+          nullable: true
+        hexColorPrimary:
+          type: string
+          nullable: true
+        hexColorSecondary:
+          type: string
+          nullable: true
+    CautionDto:
+      type: object
+      properties:
+        cautionId:
+          type: string
+          format: ulid
+        name:
+          type: string
+        description:
+          type: string
+        alert:
+          type: string
+        iconUrl:
+          type: string
+          format: uri
+          nullable: true
+        hexColorPrimary:
+          type: string
+          nullable: true
+        hexColorSecondary:
+          type: string
+          nullable: true
+
+    # --- Value Objects and Enums ---
+    RootAggregateType:
+      type: string
+      enum: [Venue, Event, User] # Assuming values
+    NutritionalInfo:
+      type: object
+      properties:
+        calories:
+          type: number
+          format: double
+        protein:
+          type: number
+          format: double
+        carbohydrates:
+          type: number
+          format: double
+        fat:
+          type: number
+          format: double
+    PortionInfo:
+      type: object
+      properties:
+        size:
+          type: number
+          format: double
+        unit:
+          type: string
+          example: "grams"
+    Price:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string
+          example: "TRY"
+        originalAmount:
+          type: number
+          format: double
+          nullable: true
+    LinkedCaution:
+      type: object
+      properties:
+        cautionDefinitionId:
+          type: string
+          format: ulid
+        name:
+          type: string
+    LinkedAllergen:
+      type: object
+      properties:
+        allergenDefinitionId:
+          type: string
+          format: ulid
+        name:
+          type: string
+    HyperDetailsDto:
+      type: object
+      description: "Represents metadata for hypermedia-driven entities."
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        isDeleted:
+          type: boolean
