@@ -29,12 +29,7 @@ jobs:
         run: |
           mkdir -p ./docs
 
-          # Generate an index page that links to each API
-          echo "<h1>Neavents API Documentation</h1>" > ./docs/index.html
-          echo "<ul>" >> ./docs/index.html
-          echo '<li><a href="./smart-menu/">Smart Menu API</a></li>' >> ./docs/index.html
-          echo '<li><a href="./media/">Media API</a></li>' >> ./docs/index.html
-          echo "</ul>" >> ./docs/index.html
+          cp index.html ./docs/index.html
 
           redoc-cli bundle neavents-menu-api.yaml -o ./docs/smart-menu/index.html
           redoc-cli bundle neavents-media-api.yaml -o ./docs/media/index.html

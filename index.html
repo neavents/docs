@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neavents API Documentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .dark .grid-bg {
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 2rem 2rem;
+        }
+    </style>
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+</head>
+<body class="bg-slate-900 text-slate-100 grid-bg">
+    <div class="relative min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[60rem] bg-indigo-500/20 blur-[200px] rounded-full"></div>
+
+        <div class="relative z-10 w-full max-w-4xl">
+            <header class="text-center mb-12">
+                <h1 class="text-4xl md:text-6xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">
+                    Neavents API Documentation
+                </h1>
+                <p class="mt-4 text-lg text-slate-400 max-w-2xl mx-auto">
+                    Welcome to the central hub for all Neavents service APIs. Explore our resources to build powerful integrations.
+                </p>
+            </header>
+
+            <main class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Smart Menu API Card -->
+                <a href="./smart-menu/" class="block p-6 bg-slate-800/50 border border-slate-700 rounded-lg backdrop-blur-sm hover:bg-slate-800/80 hover:border-indigo-500 transition-all duration-300 group">
+                    <h2 class="text-2xl font-semibold text-slate-50 group-hover:text-indigo-400 transition-colors">
+                        Smart Menu API
+                    </h2>
+                    <p class="mt-2 text-slate-400">
+                        Access and manage dynamic menu information, including items, pricing, and availability for venues.
+                    </p>
+                    <div class="mt-4 text-indigo-400 font-medium flex items-center">
+                        View Documentation
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                    </div>
+                </a>
+
+                <!-- Media API Card -->
+                <a href="./media/" class="block p-6 bg-slate-800/50 border border-slate-700 rounded-lg backdrop-blur-sm hover:bg-slate-800/80 hover:border-indigo-500 transition-all duration-300 group">
+                    <h2 class="text-2xl font-semibold text-slate-50 group-hover:text-indigo-400 transition-colors">
+                        Media API
+                    </h2>
+                    <p class="mt-2 text-slate-400">
+                        Handle image and video uploads, processing, and delivery for events, venues, and user-generated content.
+                    </p>
+                    <div class="mt-4 text-indigo-400 font-medium flex items-center">
+                        View Documentation
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                    </div>
+                </a>
+            </main>
+
+            <footer class="text-center mt-16 text-slate-500">
+                <p>&copy; 2025 Neavents. All Rights Reserved.</p>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>
