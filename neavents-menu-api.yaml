@@ -347,9 +347,10 @@ paths:
           description: "Removal successful."
 
   # --- AllergenLinkingController ---
-  /smartmenu/{smartMenuId}/items/{itemId}/allergens:
+  /smartmenu/{smartMenuId}/sections/{sectionId}/items/{itemId}/allergens:
     parameters:
       - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/sectionId'
       - $ref: '#/components/parameters/itemId'
     put:
       tags: ["Allergen Linking"]
@@ -373,9 +374,10 @@ paths:
       responses:
         '501':
           description: "This endpoint is not implemented. Allergen information is retrieved as part of the parent Item DTO."
-  /smartmenu/{smartMenuId}/items/{itemId}/allergens/{allergenId}:
+  /smartmenu/{smartMenuId}/sections/{sectionId}/items/{itemId}/allergens/{allergenId}:
     parameters:
       - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/sectionId'
       - $ref: '#/components/parameters/itemId'
       - $ref: '#/components/parameters/allergenId'
     delete:
@@ -387,9 +389,10 @@ paths:
           description: "Unlink successful."
 
   # --- CautionLinkingController ---
-  /smartmenu/{smartMenuId}/items/{itemId}/cautions:
+  /smartmenu/{smartMenuId}/sections/{sectionId}/items/{itemId}/cautions:
     parameters:
       - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/sectionId'
       - $ref: '#/components/parameters/itemId'
     put:
       tags: ["Caution Linking"]
@@ -413,9 +416,10 @@ paths:
       responses:
         '501':
           description: "This endpoint is not implemented. Caution information is retrieved as part of the parent Item DTO."
-  /smartmenu/{smartMenuId}/items/{itemId}/cautions/{cautionId}:
+  /smartmenu/{smartMenuId}/sections/{sectionId}/items/{itemId}/cautions/{cautionId}:
     parameters:
       - $ref: '#/components/parameters/smartMenuId'
+      - $ref: '#/components/parameters/sectionId'
       - $ref: '#/components/parameters/itemId'
       - $ref: '#/components/parameters/cautionId'
     delete:
