@@ -23,8 +23,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install Redoc CLI
-        run: npm install -g redoc-cli
+      # - name: Install Redoc CLI
+      #   run: npm install -g redoc-cli
 
       - name: Build API Docs for each service
         run: |
